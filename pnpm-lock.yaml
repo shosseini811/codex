@@ -147,7 +147,7 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1
       ts-node:
-        specifier: ^10.9.1
+        specifier: ^10.9.2
         version: 10.9.2(@types/node@22.14.1)(typescript@5.8.3)
       typescript:
         specifier: ^5.0.3
@@ -1729,6 +1729,7 @@ packages:
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
+    deprecated: Use your platform's native DOMException instead
 
   node-emoji@2.2.0:
     resolution: {integrity: sha512-Z3lTE9pLaJF47NyMhd4ww1yFTAP8YhYI8SleJiHzM46Fgpm5cnNzSl9XfzFNqbaz+VlJrIj3fXQ4DeN1Rjm6cw==}

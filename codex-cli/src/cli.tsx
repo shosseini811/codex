@@ -1,9 +1,13 @@
 #!/usr/bin/env node
+console.log("[1] Starting CLI execution");
+
 import "dotenv/config";
+console.log("[2] Loaded environment variables");
 
 // Hack to suppress deprecation warnings (punycode)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (process as any).noDeprecation = true;
+console.log("[3] Suppressed deprecation warnings");
 
 import type { AppRollout } from "./app";
 import type { ApprovalPolicy } from "./approvals";
@@ -41,11 +45,17 @@ import React from "react";
 // Call this early so `tail -F "$TMPDIR/oai-codex/codex-cli-latest.log"` works
 // immediately. This must be run with DEBUG=1 for logging to work.
 initLogger();
+console.log("[4] Initialized logger");
+
+
 
 // TODO: migrate to new versions of quiet mode
 //
 //     -q, --quiet    Non-interactive quiet mode that only prints final message
 //     -j, --json     Non-interactive JSON output mode that prints JSON messages
+
+console.log("[5] About to parse command line arguments");
+//  The cli variable is setting up a tool that users can run from their terminal/command prompt by typing codex followed by various options.
 
 const cli = meow(
   `
@@ -172,6 +182,15 @@ const cli = meow(
   },
 );
 
+// console.log("CLI ", cli);
+
+// Extract and log specific properties from the cli object
+console.log("CLI inputs:", cli.input);
+console.log("CLI flags:", cli.flags);
+console.log("Selected model:", cli.flags.model);
+console.log("Approval mode:", cli.flags.approvalMode);
+
+console.log("[7] Checking for special commands");
 // Handle 'completion' subcommand before any prompting or API calls
 if (cli.input[0] === "completion") {
   const shell = cli.input[1] || "bash";
@@ -227,6 +246,7 @@ if (cli.flags.config) {
 // API key handling
 // ---------------------------------------------------------------------------
 
+console.log("[8] Checking for API key");
 const apiKey = process.env["OPENAI_API_KEY"];
 
 if (!apiKey) {
@@ -243,6 +263,7 @@ if (!apiKey) {
 }
 
 const fullContextMode = Boolean(cli.flags.fullContext);
+console.log("[9] Loading configuration");
 let config = loadConfig(undefined, undefined, {
   cwd: process.cwd(),
   disableProjectDoc: Boolean(cli.flags.noProjectDoc),
@@ -264,11 +285,13 @@ config = {
 
 // Check for updates after loading config
 // This is important because we write state file in the config dir
+console.log("[10] Checking for updates");
 await checkForUpdates().catch();
 // ---------------------------------------------------------------------------
 // --flex-mode validation (only allowed for o3 and o4-mini)
 // ---------------------------------------------------------------------------
 
+console.log("[11] Checking flex mode settings");
 if (cli.flags.flexMode) {
   const allowedFlexModels = new Set(["o3", "o4-mini"]);
   if (!allowedFlexModels.has(config.model)) {
@@ -309,6 +332,7 @@ if (cli.flags.view) {
   }
 }
 
+console.log("[12] Checking for full context mode");
 // If we are running in --fullcontext mode, do that and exit.
 if (fullContextMode) {
   await runSinglePass({
@@ -325,6 +349,7 @@ const additionalWritableRoots: ReadonlyArray<string> = (
   cli.flags.writableRoot ?? []
 ).map((p) => path.resolve(p));
 
+console.log("[13] Checking for quiet mode");
 // If we are running in --quiet mode, do that and exit.
 const quietMode = Boolean(cli.flags.quiet);
 const fullStdout = Boolean(cli.flags.fullStdout);
@@ -358,6 +383,7 @@ if (quietMode) {
   process.exit(0);
 }
 
+console.log("[14] Setting up approval policy");
 // Default to the "suggest" policy.
 // Determine the approval policy to use in interactive mode.
 //
@@ -380,6 +406,7 @@ const approvalPolicy: ApprovalPolicy =
 
 preloadModels();
 
+console.log("[15] Starting the main application UI");
 const instance = render(
   <App
     prompt={prompt}
@@ -458,6 +485,7 @@ async function runQuietMode({
   additionalWritableRoots: ReadonlyArray<string>;
   config: AppConfig;
 }): Promise<void> {
+
   const agent = new AgentLoop({
     model: config.model,
     config: config,

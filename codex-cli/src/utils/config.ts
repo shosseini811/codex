@@ -18,10 +18,13 @@ import { dirname, join, extname, resolve as resolvePath } from "path";
 export const DEFAULT_AGENTIC_MODEL = "o4-mini";
 export const DEFAULT_FULL_CONTEXT_MODEL = "gpt-4.1";
 export const DEFAULT_APPROVAL_MODE = AutoApprovalMode.SUGGEST;
+console.log("DEFAULT_APPROVAL_MODE", DEFAULT_APPROVAL_MODE);
 export const DEFAULT_INSTRUCTIONS = "";
 
 export const CONFIG_DIR = join(homedir(), ".codex");
+console.log("CONFIG_DIR", CONFIG_DIR);
 export const CONFIG_JSON_FILEPATH = join(CONFIG_DIR, "config.json");
+console.log("CONFIG_JSON_FILEPATH", CONFIG_JSON_FILEPATH);
 export const CONFIG_YAML_FILEPATH = join(CONFIG_DIR, "config.yaml");
 export const CONFIG_YML_FILEPATH = join(CONFIG_DIR, "config.yml");
 
@@ -30,10 +33,12 @@ export const CONFIG_YML_FILEPATH = join(CONFIG_DIR, "config.yml");
 // work unchanged.
 export const CONFIG_FILEPATH = CONFIG_JSON_FILEPATH;
 export const INSTRUCTIONS_FILEPATH = join(CONFIG_DIR, "instructions.md");
-
+// console.log("Process.env", process.env);
 export const OPENAI_TIMEOUT_MS =
   parseInt(process.env["OPENAI_TIMEOUT_MS"] || "0", 10) || undefined;
+
 export const OPENAI_BASE_URL = process.env["OPENAI_BASE_URL"] || "";
+
 export let OPENAI_API_KEY = process.env["OPENAI_API_KEY"] || "";
 
 export function setApiKey(apiKey: string): void {
@@ -43,6 +48,7 @@ export function setApiKey(apiKey: string): void {
 // Formatting (quiet mode-only).
 export const PRETTY_PRINT = Boolean(process.env["PRETTY_PRINT"] || "");
 
+// The question mark in TypeScript is used to mark a variable as optional, allowing it to be omitted or set to undefined.
 // Represents config as persisted in config.json.
 export type StoredConfig = {
   model?: string;
@@ -60,6 +66,7 @@ export type StoredConfig = {
   safeCommands?: Array<string>;
 };
 
+// console.log("StoredConfig", StoredConfig);
 // Minimal config written on first run.  An *empty* model string ensures that
 // we always fall back to DEFAULT_MODEL on load, so updates to the default keep
 // propagating to existing users until they explicitly set a model.
@@ -115,9 +122,12 @@ export function discoverProjectDocPath(startDir: string): string | null {
 
   // 2) Fallback: walk up to the Git root and look there.
   let dir = cwd;
+  console.log("dir", dir);
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const gitPath = join(dir, ".git");
+    console.log("gitPath", gitPath);
+    // existsSync returns true if the path exists, false otherwise.
     if (existsSync(gitPath)) {
       // Once we hit the Git root, search its top‑level for the doc
       for (const name of PROJECT_DOC_FILENAMES) {
@@ -131,6 +141,7 @@ export function discoverProjectDocPath(startDir: string): string | null {
     }
 
     const parent = dirname(dir);
+    console.log("parent", parent);
     if (parent === dir) {
       // Reached filesystem root without finding Git.
       return null;
@@ -166,6 +177,7 @@ export function loadProjectDoc(cwd: string, explicitPath?: string): string {
   }
 
   try {
+    // readFileSync: read the file synchronously. 
     const buf = readFileSync(filepath);
     if (buf.byteLength > PROJECT_DOC_MAX_BYTES) {
       // eslint-disable-next-line no-console
@@ -199,6 +211,7 @@ export const loadConfig = (
   // the caller passed the default JSON path, automatically fall back to YAML
   // variants.
   let actualConfigPath = configPath;
+  console.log("actualConfigPath", actualConfigPath);
   if (!existsSync(actualConfigPath)) {
     if (configPath === CONFIG_FILEPATH) {
       if (existsSync(CONFIG_YAML_FILEPATH)) {
@@ -212,7 +225,10 @@ export const loadConfig = (
   let storedConfig: StoredConfig = {};
   if (existsSync(actualConfigPath)) {
     const raw = readFileSync(actualConfigPath, "utf-8");
+    console.log("raw", raw);
+    // Get the file extension
     const ext = extname(actualConfigPath).toLowerCase();
+    console.log("ext", ext);
     try {
       if (ext === ".yaml" || ext === ".yml") {
         storedConfig = loadYaml(raw) as unknown as StoredConfig;
@@ -224,9 +240,12 @@ export const loadConfig = (
       storedConfig = {};
     }
   }
-
+// nullish coalescing operator  ??  If instructionsPath is defined and not null, use it. Otherwise, use INSTRUCTIONS_FILEPATH
   const instructionsFilePathResolved =
     instructionsPath ?? INSTRUCTIONS_FILEPATH;
+
+    // The ternary operator ?: If instructionsFilePathResolved exists, read it; 
+    // otherwise, use default instructions
   const userInstructions = existsSync(instructionsFilePathResolved)
     ? readFileSync(instructionsFilePathResolved, "utf-8")
     : DEFAULT_INSTRUCTIONS;
@@ -237,6 +256,7 @@ export const loadConfig = (
     process.env["CODEX_DISABLE_PROJECT_DOC"] !== "1";
 
   let projectDoc = "";
+  // projectDocPath it could be either string or null
   let projectDocPath: string | null = null;
   if (shouldLoadProjectDoc) {
     const cwd = options.cwd ?? process.cwd();

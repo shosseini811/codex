@@ -1,3 +1,4 @@
+// In TypeScript (and some other languages), an enum is a special type that lets you define a set of named constants.
 export enum AutoApprovalMode {
   SUGGEST = "suggest",
   AUTO_EDIT = "auto-edit",
