@@ -248,6 +248,7 @@ if (cli.flags.config) {
 
 console.log("[8] Checking for API key");
 const apiKey = process.env["OPENAI_API_KEY"];
+// console.log("apiKey", apiKey);
 
 if (!apiKey) {
   // eslint-disable-next-line no-console

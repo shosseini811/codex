@@ -45,6 +45,12 @@ export function setApiKey(apiKey: string): void {
   OPENAI_API_KEY = apiKey;
 }
 
+// process.env
+// Environment variables can be set in several ways:
+// In your terminal session (as you saw with the export command)
+// In configuration files like .zshrc, .bash_profile, etc.
+// In environment-specific files (like .env files in many Node.js projects)
+
 // Formatting (quiet mode-only).
 export const PRETTY_PRINT = Boolean(process.env["PRETTY_PRINT"] || "");
 
@@ -86,7 +92,9 @@ export type AppConfig = {
   instructions: string;
   approvalMode?: AutoApprovalMode;
   fullAutoErrorMode?: FullAutoErrorMode;
-  memory?: MemoryConfig;
+  memory?: MemoryConfig; // If the application does include a memory property, 
+  // that property must be an object with an enabled property set to either true or false
+
   /** Whether to enable desktop notifications for responses */
   notify: boolean;
 
@@ -259,11 +267,15 @@ export const loadConfig = (
   // projectDocPath it could be either string or null
   let projectDocPath: string | null = null;
   if (shouldLoadProjectDoc) {
+    // ?? nullish coalescing operator
     const cwd = options.cwd ?? process.cwd();
+    console.log("cwd  options.cwd ?? process.cwd()", cwd);
+    console.log("options", options);
     projectDoc = loadProjectDoc(cwd, options.projectDocPath);
     projectDocPath = options.projectDocPath
       ? resolvePath(cwd, options.projectDocPath)
       : discoverProjectDocPath(cwd);
+    console.log("projectDocPath", projectDocPath);
     if (projectDocPath) {
       if (isLoggingEnabled()) {
         log(
@@ -411,11 +423,16 @@ export const saveConfig = (
 
   const ext = extname(targetPath).toLowerCase();
   // Create the config object to save
+  // configToSave The : StoredConfig part is a TypeScript feature. 
+  // It tells TypeScript that configToSave should have the structure defined 
+  // by the StoredConfig type or interface. 
+  // This helps catch errors if you try to assign something that doesn't match the expected shape.
+
   const configToSave: StoredConfig = {
     model: config.model,
     approvalMode: config.approvalMode,
   };
-
+console.log("configToSave", configToSave);
   // Add history settings if they exist
   if (config.history) {
     configToSave.history = {
