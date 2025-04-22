@@ -28,6 +28,11 @@ const suggestions = [
   "are there any bugs in my code?",
 ];
 
+// // With both destructuring and TypeScript types
+// function greet({ name }: { name: string }) {
+//   console.log("Hello, " + name);
+// }
+
 export default function TerminalChatInput({
   isNew,
   loading,
@@ -49,6 +54,7 @@ export default function TerminalChatInput({
   thinkingSeconds,
   items = [],
 }: {
+  // it expect isNew to be a boolean etc
   isNew: boolean;
   loading: boolean;
   submitInput: (input: Array<ResponseInputItem>) => void;
@@ -61,7 +67,7 @@ export default function TerminalChatInput({
   setLastResponseId: (lastResponseId: string) => void;
   setItems: React.Dispatch<React.SetStateAction<Array<ResponseItem>>>;
   contextLeftPercent: number;
-  openOverlay: () => void;
+  openOverlay: () => void; // () => void means “takes no arguments and returns nothing.”
   openModelOverlay: () => void;
   openApprovalOverlay: () => void;
   openHelpOverlay: () => void;
@@ -79,7 +85,7 @@ export default function TerminalChatInput({
   const app = useApp();
   const [selectedSuggestion, setSelectedSuggestion] = useState<number>(0);
   const [input, setInput] = useState("");
-  const [history, setHistory] = useState<Array<HistoryEntry>>([]);
+  const [history, setHistory] = useState<Array<HistoryEntry>>([]); // []: This is the initial value for the state - an empty array. When the component first renders, history will be an empty array.
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
   const [draftInput, setDraftInput] = useState<string>("");
   const [skipNextSubmit, setSkipNextSubmit] = useState<boolean>(false);
@@ -96,15 +102,32 @@ export default function TerminalChatInput({
   // Reset slash suggestion index when input prefix changes
   useEffect(() => {
     if (input.trim().startsWith("/")) {
+      // highlight first slash command
       setSelectedSlashSuggestion(0);
     }
   }, [input]);
+
+  console.log('selected suggestion:', selectedSuggestion);
+
+  // useEffect(() => {
+  //   // Do something when user changes
+  // }, [user]); // Run when user changes
+
+  // Log the input value to console whenever it changes
+  useEffect(() => {
+    console.log("Current prompt:", input);
+  }, [input]);
+
+  // useInput is a special function (called a "hook" in React) that comes from a library called "ink". 
+  // This hook lets you detect keyboard input in a terminal application.
 
   useInput(
     (_input, _key) => {
       // Slash command navigation: up/down to select, enter to fill
       if (!confirmationPrompt && !loading && input.trim().startsWith("/")) {
         const prefix = input.trim();
+
+        // (cmd: SlashCommand) means each item in the array is called cmd and it's a SlashCommand type
         const matches = SLASH_COMMANDS.filter((cmd: SlashCommand) =>
           cmd.command.startsWith(prefix),
         );

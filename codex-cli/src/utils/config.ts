@@ -17,6 +17,7 @@ import { dirname, join, extname, resolve as resolvePath } from "path";
 
 export const DEFAULT_AGENTIC_MODEL = "o4-mini";
 export const DEFAULT_FULL_CONTEXT_MODEL = "gpt-4.1";
+
 export const DEFAULT_APPROVAL_MODE = AutoApprovalMode.SUGGEST;
 console.log("DEFAULT_APPROVAL_MODE", DEFAULT_APPROVAL_MODE);
 export const DEFAULT_INSTRUCTIONS = "";
@@ -26,7 +27,9 @@ console.log("CONFIG_DIR", CONFIG_DIR);
 export const CONFIG_JSON_FILEPATH = join(CONFIG_DIR, "config.json");
 console.log("CONFIG_JSON_FILEPATH", CONFIG_JSON_FILEPATH);
 export const CONFIG_YAML_FILEPATH = join(CONFIG_DIR, "config.yaml");
+console.log("CONFIG_YAML_FILEPATH", CONFIG_YAML_FILEPATH);
 export const CONFIG_YML_FILEPATH = join(CONFIG_DIR, "config.yml");
+console.log("CONFIG_YML_FILEPATH", CONFIG_YML_FILEPATH);
 
 // Keep the original constant name for backward compatibility, but point it at
 // the default JSON path. Code that relies on this constant will continue to
@@ -106,6 +109,7 @@ export type AppConfig = {
     sensitivePatterns: Array<string>;
   };
   /** User-defined safe commands */
+  // If present, its value must be an array (a list) of strings—nothing else
   safeCommands?: Array<string>;
 };
 
@@ -116,21 +120,26 @@ export type AppConfig = {
 export const PROJECT_DOC_MAX_BYTES = 32 * 1024; // 32 kB
 
 const PROJECT_DOC_FILENAMES = ["codex.md", ".codex.md", "CODEX.md"];
-
+// the input argument must be a string and output must be a string or null
 export function discoverProjectDocPath(startDir: string): string | null {
+  // take the startDir string the caller gave us (which might be './', '.', '../project', or already '/Users/alice/project'), 
+  // and produce a clean absolute path like '/Users/alice/project'. 
   const cwd = resolvePath(startDir);
-
+  console.log("cwd", cwd);
+  console.log("startDir: ", startDir);
   // 1) Look in the explicit CWD first:
   for (const name of PROJECT_DOC_FILENAMES) {
     const direct = join(cwd, name);
     if (existsSync(direct)) {
+      // As soon as you find the first match, you return that path and exit the entire discoverProjectDocPath function.
+
       return direct;
     }
   }
 
   // 2) Fallback: walk up to the Git root and look there.
   let dir = cwd;
-  console.log("dir", dir);
+  // console.log("dir", dir);
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const gitPath = join(dir, ".git");
@@ -147,6 +156,7 @@ export function discoverProjectDocPath(startDir: string): string | null {
       // If Git root but no doc, stop looking.
       return null;
     }
+// That call to dirname(dir) is using Node’s path.dirname function to get the parent directory of whatever dir currently is. In plain terms, it “strips off” the last path segment.
 
     const parent = dirname(dir);
     console.log("parent", parent);
@@ -166,10 +176,17 @@ export function discoverProjectDocPath(startDir: string): string | null {
  * @param cwd The current working directory of the caller
  * @param explicitPath If provided, skips discovery and loads the given path
  */
+
+// •	loadProjectDoc(cwd: string, explicitPath?: string): takes two inputs:
+// 1.	cwd (required) – the base directory to start from,
+// 2.	explicitPath (optional, because of the ?) – a user‑provided path to the doc.
+// •	: string → whatever the function returns will always be a string.
+
 export function loadProjectDoc(cwd: string, explicitPath?: string): string {
   let filepath: string | null = null;
 
   if (explicitPath) {
+    // We combine it with cwd to form an absolute path:
     filepath = resolvePath(cwd, explicitPath);
     if (!existsSync(filepath)) {
       // eslint-disable-next-line no-console
@@ -211,8 +228,11 @@ export type LoadConfigOptions = {
 };
 
 export const loadConfig = (
+  //  string | undefined - This means the parameter can be either a string OR undefined. 
   configPath: string | undefined = CONFIG_FILEPATH,
   instructionsPath: string | undefined = INSTRUCTIONS_FILEPATH,
+  // = {}
+  // if the caller doesn’t pass anything for options, use an empty object ({}) instead of undefined.
   options: LoadConfigOptions = {},
 ): AppConfig => {
   // Determine the actual path to load. If the provided path doesn't exist and
@@ -220,6 +240,9 @@ export const loadConfig = (
   // variants.
   let actualConfigPath = configPath;
   console.log("actualConfigPath", actualConfigPath);
+  
+  //  If there’s no file at whatever actualConfigPath is pointing to (usually the JSON config file in ~/.codex/config.json), 
+  // then we need to look elsewhere.
   if (!existsSync(actualConfigPath)) {
     if (configPath === CONFIG_FILEPATH) {
       if (existsSync(CONFIG_YAML_FILEPATH)) {
@@ -271,6 +294,10 @@ export const loadConfig = (
     const cwd = options.cwd ?? process.cwd();
     console.log("cwd  options.cwd ?? process.cwd()", cwd);
     console.log("options", options);
+    // console process
+    console.log("process.cmd:" , process.cwd())
+
+
     projectDoc = loadProjectDoc(cwd, options.projectDocPath);
     projectDocPath = options.projectDocPath
       ? resolvePath(cwd, options.projectDocPath)

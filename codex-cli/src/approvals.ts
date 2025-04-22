@@ -43,6 +43,9 @@ export type ApplyPatchCommand = {
   patch: string;
 };
 
+// “ApprovalPolicy can only ever be one of these three exact strings.” 
+// If someone tries to pass "ask" or "auto" or any other value, the compiler will complain.
+// By prefixing with export, you make that type available to other files.
 export type ApprovalPolicy =
   /**
    * Under this policy, only "known safe" commands as defined by
@@ -70,6 +73,10 @@ export type ApprovalPolicy =
  *
  * Note `env` must be the same `env` that will be used to spawn the process.
  */
+
+// return condition
+//   ? valueIfTrue
+//   : valueIfFalse;
 export function canAutoApprove(
   command: ReadonlyArray<string>,
   policy: ApprovalPolicy,
@@ -293,6 +300,8 @@ export type SafeCommandReason = {
  * returns null.
  */
 export function isSafeCommand(
+  // It represents an array where you can read (access) the elements, 
+  // but you cannot change (modify) the array or its elements.
   command: ReadonlyArray<string>,
 ): SafeCommandReason | null {
   const [cmd0, cmd1, cmd2, cmd3] = command;

@@ -26,7 +26,7 @@ import {
   loadConfig,
   PRETTY_PRINT,
   INSTRUCTIONS_FILEPATH,
-} from "./utils/config";
+} from "./utils/config"; // The code is importing three specific things from a file called config.ts
 import { createInputItem } from "./utils/input-utils";
 import {
   isModelSupportedForResponses,
@@ -274,8 +274,14 @@ let config = loadConfig(undefined, undefined, {
 
 const prompt = cli.input[0];
 const model = cli.flags.model;
-const imagePaths = cli.flags.image as Array<string> | undefined;
+console.log("[9a] Loading configuration");
+// console model
+console.log("model", model);
 
+const imagePaths = cli.flags.image as Array<string> | undefined;
+console.log("[9a] Loading configuration");
+console.log("config", config);
+// The JavaScript spread operator (...) allows us to quickly copy all or part of an existing array or object into another array or object.
 config = {
   apiKey,
   ...config,
@@ -283,10 +289,14 @@ config = {
   flexMode: Boolean(cli.flags.flexMode),
   notify: Boolean(cli.flags.notify),
 };
+console.log("[9b] Loaded configuration");
+console.log("config", config);
+
 
 // Check for updates after loading config
 // This is important because we write state file in the config dir
 console.log("[10] Checking for updates");
+console.log("config", config);
 await checkForUpdates().catch();
 // ---------------------------------------------------------------------------
 // --flex-mode validation (only allowed for o3 and o4-mini)
@@ -294,6 +304,18 @@ await checkForUpdates().catch();
 
 console.log("[11] Checking flex mode settings");
 if (cli.flags.flexMode) {
+
+//   // Create the set of allowed models
+//   const allowedFlexModels = new Set(["o3", "o4-mini"]);
+
+//   // 1. Log out the contents
+//   console.log("Allowed flex models:", [...allowedFlexModels]);
+
+//   // 2. Test membership
+//   console.log("Is 'o3' supported for flex mode?", allowedFlexModels.has("o3"));
+//   console.log("Is 'o4-mini' supported for flex mode?", allowedFlexModels.has("o4-mini"));
+// // console.log("Is 'gpt-4' supported for flex mode?", allowedFlexModels.has("gpt-4"));
+
   const allowedFlexModels = new Set(["o3", "o4-mini"]);
   if (!allowedFlexModels.has(config.model)) {
     // eslint-disable-next-line no-console
@@ -408,6 +430,8 @@ const approvalPolicy: ApprovalPolicy =
 preloadModels();
 
 console.log("[15] Starting the main application UI");
+// print prompt
+console.log("[15a] Prompt:", prompt);
 const instance = render(
   <App
     prompt={prompt}
