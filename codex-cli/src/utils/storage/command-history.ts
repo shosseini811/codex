@@ -8,7 +8,7 @@ const DEFAULT_HISTORY_SIZE = 1000;
 
 // Regex patterns for sensitive commands that should not be saved
 const SENSITIVE_PATTERNS = [
-  /\b[A-Za-z0-9-_]{20,}\b/, // API keys and tokens
+  /\b[A-Za-z0-9-_]{20,}\b/, // API keys and tokens Any word with 20+ letters, numbers, hyphens, or underscores (likely API keys)
   /\bpassword\b/i,
   /\bsecret\b/i,
   /\btoken\b/i,
@@ -58,6 +58,9 @@ export async function loadCommandHistory(): Promise<Array<HistoryEntry>> {
 export async function saveCommandHistory(
   history: Array<HistoryEntry>,
   config: HistoryConfig = DEFAULT_HISTORY_CONFIG,
+  // Promise: A Promise in JavaScript is an object that represents a task that will complete in the future. 
+  // It's like saying "I promise I'll get back to you with a result or an error."
+  // void: This means the function doesn't return any value when it completes. It just does its job and finishes without giving back any data.
 ): Promise<void> {
   try {
     // Create directory if it doesn't exist
@@ -65,11 +68,15 @@ export async function saveCommandHistory(
     await fs.mkdir(dir, { recursive: true });
 
     // Trim history to max size
+    // // history.slice(-3) → start 3 from the end → items at indexes 2,3,4
     const trimmedHistory = history.slice(-config.maxSize);
 
     await fs.writeFile(
       HISTORY_FILE,
-      JSON.stringify(trimmedHistory, null, 2),
+      JSON.stringify(trimmedHistory, null, 2),//  converts the JavaScript object trimmedHistory (which is an array of history entries) 
+      // into a formatted JSON string that can be saved to a file. 
+      // null: This is the second argument - a replacer function or array that can be used to filter or transform values during the conversion. When set to null, it means "include all properties without any special handling."
+      // 2: This is the third argument - it's the indentation level for the JSON string. A value of 2 means the JSON will be formatted with 2 spaces of indentation for better readability.
       "utf-8",
     );
   } catch (error) {
@@ -91,6 +98,7 @@ export async function addToHistory(
   }
 
   // Check if command contains sensitive information
+  // it simply returns the original history array without making any changes.
   if (isSensitiveCommand(command, config.sensitivePatterns)) {
     return history;
   }
@@ -106,6 +114,8 @@ export async function addToHistory(
     command,
     timestamp: Date.now(),
   };
+// print history
+console.log("Adding to history:", history);
 
   const newHistory = [...history, newEntry];
 

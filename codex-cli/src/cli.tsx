@@ -275,6 +275,8 @@ let config = loadConfig(undefined, undefined, {
 const prompt = cli.input[0];
 const model = cli.flags.model;
 console.log("[9a] Loading configuration");
+// print prompt
+console.log("prompt", prompt);
 // console model
 console.log("model", model);
 

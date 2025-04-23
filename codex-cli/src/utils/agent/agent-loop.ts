@@ -8,6 +8,9 @@ import type {
 } from "openai/resources/responses/responses.mjs";
 import type { Reasoning } from "openai/resources.mjs";
 
+// TypeScript files (.ts) are compiled into JavaScript files (.js)
+// When your code runs, it's actually running these JavaScript files, not the TypeScript files
+
 import { log, isLoggingEnabled } from "./log.js";
 import { OPENAI_BASE_URL, OPENAI_TIMEOUT_MS } from "../config.js";
 import { parseToolCallArguments } from "../parsers.js";
@@ -56,6 +59,7 @@ type AgentLoopParams = {
   onLastResponseId: (lastResponseId: string) => void;
 };
 
+// private fields that are only used within the class
 export class AgentLoop {
   private model: string;
   private instructions?: string;
@@ -70,8 +74,16 @@ export class AgentLoop {
   // instance shape without resorting to `any`.
   private oai: OpenAI;
 
+  // It says “onItem must be a function that:
+  // takes exactly one argument named item, whose type is ResponseItem
+  // returns nothing (void)"
+
   private onItem: (item: ResponseItem) => void;
   private onLoading: (loading: boolean) => void;
+
+  // Promise<CommandConfirmation>
+  // This is asynchronous. It returns a Promise that will eventually resolve to a CommandConfirmation object.
+//getCommandConfirmation: It's a property declaration that will hold a function.
   private getCommandConfirmation: (
     command: Array<string>,
     applyPatch: ApplyPatchCommand | undefined,
