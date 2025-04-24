@@ -3,9 +3,11 @@ import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 
+// The isLoggingEnabled() and log() are two separate methods, and they work independently. 
+// The log() method will run regardless of what isLoggingEnabled() returns (true or false).
 interface Logger {
   /** Checking this can be used to avoid constructing a large log message. */
-  isLoggingEnabled(): boolean;
+  isLoggingEnabled(): boolean;// returns boolean
 
   log(message: string): void;
 }
@@ -68,7 +70,7 @@ function now() {
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 }
 
-let logger: Logger;
+let logger: Logger;// // Declared but not initialized (it's undefined)
 
 /**
  * Creates a .log file for this session, but also symlinks codex-cli-latest.log
@@ -124,6 +126,6 @@ export function log(message: string): void {
   (logger ?? initLogger()).log(message);
 }
 
-export function isLoggingEnabled(): boolean {
-  return (logger ?? initLogger()).isLoggingEnabled();
+export function isLoggingEnabled(): boolean { // this function returns boolean
+  return (logger ?? initLogger()).isLoggingEnabled();// use the left value if it exists, otherwise use the right value
 }

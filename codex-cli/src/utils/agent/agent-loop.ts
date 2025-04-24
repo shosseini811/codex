@@ -38,7 +38,7 @@ export type CommandConfirmation = {
   explanation?: string;
 };
 
-const alreadyProcessedResponses = new Set();
+const alreadyProcessedResponses = new Set(); // - It automatically removes duplicates
 
 type AgentLoopParams = {
   model: string;
@@ -112,6 +112,7 @@ export class AgentLoop {
    *  error from OpenAI. */
 
   // A Set is a special collection object that can only store unique values.
+  // <string> specifies that this Set can only contain string values
   private pendingAborts: Set<string> = new Set(); // allows you to specify the type of values the Set can hold
   /** Set to true by `terminate()` – prevents any further use of the instance. */
   private terminated = false;
@@ -130,6 +131,7 @@ export class AgentLoop {
 
     // Reset the current stream to allow new requests
     this.currentStream = null;
+    // If logging is enabled, it calls the log() function with a message that contains three pieces of information:
     if (isLoggingEnabled()) {
       log(
         `AgentLoop.cancel() invoked – currentStream=${Boolean(
@@ -255,7 +257,7 @@ export class AgentLoop {
         instructions: instructions ?? "",// If instructions is null/undefined, use an empty string
       } as AppConfig);
     this.additionalWritableRoots = additionalWritableRoots;
-    this.onItem = onItem;
+    this.onItem = onItem; // - this refers to the current instance of the AgentLoop class
     this.onLoading = onLoading;
     this.getCommandConfirmation = getCommandConfirmation;
     this.onLastResponseId = onLastResponseId;
@@ -510,6 +512,7 @@ export class AgentLoop {
 
         // Retry loop for transient errors. Up to MAX_RETRIES attempts.
         const MAX_RETRIES = 5;
+        // The loop tries to send a request to OpenAI up to 5 times (defined by MAX_RETRIES = 5) if certain types of temporary errors occur.
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
           try {
             let reasoning: Reasoning | undefined;
@@ -522,7 +525,8 @@ export class AgentLoop {
               }
             }
             const mergedInstructions = [prefix, this.instructions]
-              .filter(Boolean)
+              .filter(Boolean) // .filter(Boolean) is a clever JavaScript trick that removes any "falsy" values from the array. 
+              // In JavaScript, falsy values include: 0, null, undefined, false, and empty strings (""), NaN, and the special value undefined.
               .join("\n");
             if (isLoggingEnabled()) {
               log(
@@ -535,10 +539,12 @@ export class AgentLoop {
               instructions: mergedInstructions,
               previous_response_id: lastResponseId || undefined,
               input: turnInput,
-              stream: true,
+              stream: true, //  The API sends pieces of the response as they're generated, in real-time. This is like someone sending you each sentence of a letter as soon as they write it.
               parallel_tool_calls: false,
               reasoning,
-              ...(this.config.flexMode ? { service_tier: "flex" } : {}),
+              ...(this.config.flexMode ? { service_tier: "flex" } : {}), // The three dots ... at the beginning is called the "spread operator." In JavaScript, it allows you to:
+              // - Expand an array into individual elements
+              // - Spread the properties of an object into another object
               tools: [
                 {
                   type: "function",
@@ -601,7 +607,7 @@ export class AgentLoop {
               errCtx.type === "invalid_request_error";
 
             if (isTooManyTokensError) {
-              this.onItem({
+              this.onItem({ // looks like ResponseOutputMessage type
                 id: `error-${Date.now()}`,
                 type: "message",
                 role: "system",
