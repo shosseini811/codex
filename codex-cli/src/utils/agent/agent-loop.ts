@@ -110,7 +110,9 @@ export class AgentLoop {
    *  contract and prevents the
    *    400 | No tool output found for function call …
    *  error from OpenAI. */
-  private pendingAborts: Set<string> = new Set();
+
+  // A Set is a special collection object that can only store unique values.
+  private pendingAborts: Set<string> = new Set(); // allows you to specify the type of values the Set can hold
   /** Set to true by `terminate()` – prevents any further use of the instance. */
   private terminated = false;
   /** Master abort controller – fires when terminate() is invoked. */
@@ -214,6 +216,11 @@ export class AgentLoop {
    * happy under `noUnusedLocals`.  Restore when telemetry support lands.
    */
   // private cumulativeThinkingMs = 0;
+
+  // This shows that getCommandConfirmation is received as part of an object parameter in the constructor. 
+  // The constructor uses object destructuring (the {} syntax) to extract specific values from the input object.
+
+
   constructor({
     model,
     instructions,
@@ -230,7 +237,8 @@ export class AgentLoop {
     getCommandConfirmation,
     onLastResponseId,
     additionalWritableRoots,
-  }: AgentLoopParams & { config?: AppConfig }) {
+  }: AgentLoopParams & { config?: AppConfig }) { // The ? after config means this property is optional
+
     this.model = model;
     this.instructions = instructions;
     this.approvalPolicy = approvalPolicy;
@@ -244,7 +252,7 @@ export class AgentLoop {
       config ??
       ({
         model,
-        instructions: instructions ?? "",
+        instructions: instructions ?? "",// If instructions is null/undefined, use an empty string
       } as AppConfig);
     this.additionalWritableRoots = additionalWritableRoots;
     this.onItem = onItem;
@@ -505,8 +513,10 @@ export class AgentLoop {
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
           try {
             let reasoning: Reasoning | undefined;
+            console.log("reasoning model:", reasoning);
+            console.log("This model:", this.model);
             if (this.model.startsWith("o")) {
-              reasoning = { effort: "high" };
+              reasoning = { effort: "high" }; // keeps other properties the same
               if (this.model === "o3" || this.model === "o4-mini") {
                 reasoning.summary = "auto";
               }
