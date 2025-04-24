@@ -1,5 +1,8 @@
 import type { AgentName } from "package-manager-detector";
 
+// import { something } from "./file" - imports from a local file in the same directory
+// import { something } from "package-name" - imports from an installed npm package
+
 import { detectInstallerByPath } from "./package-manager-detector";
 import { CLI_VERSION } from "./session";
 import boxen from "boxen";
